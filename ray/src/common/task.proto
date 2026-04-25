@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "ray/src/common";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// TaskType defines the type of task
+enum TaskType {
+  TASK_TYPE_MONITORING = 0;
+  TASK_TYPE_AI = 1;
+  TASK_TYPE_COMMUNICATION = 2;
+  TASK_TYPE_CUSTOM = 3;
+}
+
+// TaskStatus defines the status of a task
+enum TaskStatus {
+  TASK_STATUS_PENDING = 0;
+  TASK_STATUS_ASSIGNED = 1;
+  TASK_STATUS_RUNNING = 2;
+  TASK_STATUS_COMPLETED = 3;
+  TASK_STATUS_FAILED = 4;
+  TASK_STATUS_CANCELED = 5;
+}
+
+// TaskPriority defines the priority of a task
+enum TaskPriority {
+  TASK_PRIORITY_LOW = 0;
+  TASK_PRIORITY_MEDIUM = 1;
+  TASK_PRIORITY_HIGH = 2;
+  TASK_PRIORITY_CRITICAL = 3;
+}
+
+// Task contains information about a task
+message Task {
+  string id = 1;
+  TaskType type = 2;
+  TaskPriority priority = 3;
+  TaskStatus status = 4;
+  string assigned_to = 5;
+  google.protobuf.Struct payload = 6;
+  google.protobuf.Struct result = 7;
+  string error = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp completed_at = 11;
+}
+
+// CreateTaskRequest is the request for creating a task
+message CreateTaskRequest {
+  TaskType type = 1;
+  TaskPriority priority = 2;
+  google.protobuf.Struct payload = 3;
+}
+
+// CreateTaskResponse is the response for creating a task
+message CreateTaskResponse {
+  bool success = 1;
+  string message = 2;
+  Task task = 3;
+}
+
+// GetTaskRequest is the request for getting a task by ID
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+// GetTaskResponse is the response for getting a task by ID
+message GetTaskResponse {
+  bool success = 1;
+  string message = 2;
+  Task task = 3;
+}
+
+// AssignTaskRequest is the request for assigning a task to a worker
+message AssignTaskRequest {
+  string worker_id = 1;
+}
+
+// AssignTaskResponse is the response for assigning a task to a worker
+message AssignTaskResponse {
+  bool success = 1;
+  string message = 2;
+  Task task = 3;
+}
+
+// CompleteTaskRequest is the request for completing a task
+message CompleteTaskRequest {
+  string task_id = 1;
+  google.protobuf.Struct result = 2;
+}
+
+// CompleteTaskResponse is the response for completing a task
+message CompleteTaskResponse {
+  bool success = 1;
+  string message = 2;
+  Task task = 3;
+}
+
+// FailTaskRequest is the request for marking a task as failed
+message FailTaskRequest {
+  string task_id = 1;
+  string error = 2;
+}
+
+// FailTaskResponse is the response for marking a task as failed
+message FailTaskResponse {
+  bool success = 1;
+  string message = 2;
+  Task task = 3;
+}
+
+// GetPendingTasksRequest is the request for getting all pending tasks
+message GetPendingTasksRequest {}
+
+// GetPendingTasksResponse is the response for getting all pending tasks
+message GetPendingTasksResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Task tasks = 3;
+}
+
+// GetTasksByWorkerRequest is the request for getting tasks by worker
+message GetTasksByWorkerRequest {
+  string worker_id = 1;
+}
+
+// GetTasksByWorkerResponse is the response for getting tasks by worker
+message GetTasksByWorkerResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Task tasks = 3;
+}
+
+// TaskService defines the service for task management
+service TaskService {
+  // CreateTask creates a new task
+  rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse);
+  
+  // GetTask retrieves a task by its ID
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+  
+  // AssignTask assigns the next pending task to a worker
+  rpc AssignTask(AssignTaskRequest) returns (AssignTaskResponse);
+  
+  // CompleteTask marks a task as completed
+  rpc CompleteTask(CompleteTaskRequest) returns (CompleteTaskResponse);
+  
+  // FailTask marks a task as failed
+  rpc FailTask(FailTaskRequest) returns (FailTaskResponse);
+  
+  // GetPendingTasks returns all pending tasks
+  rpc GetPendingTasks(GetPendingTasksRequest) returns (GetPendingTasksResponse);
+  
+  // GetTasksByWorker returns all tasks assigned to a worker
+  rpc GetTasksByWorker(GetTasksByWorkerRequest) returns (GetTasksByWorkerResponse);
+}

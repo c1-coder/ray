@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "ray/src/common";
+
+import "google/protobuf/timestamp.proto";
+
+// NodeType defines the type of node
+enum NodeType {
+  MASTER_NODE = 0;
+  WORKER_NODE = 1;
+}
+
+// NodeStatus defines the status of a node
+enum NodeStatus {
+  NODE_STATUS_ONLINE = 0;
+  NODE_STATUS_OFFLINE = 1;
+  NODE_STATUS_BUSY = 2;
+  NODE_STATUS_IDLE = 3;
+}
+
+// NodeInfo contains information about a node
+message NodeInfo {
+  string id = 1;
+  NodeType type = 2;
+  string address = 3;
+  int32 port = 4;
+  NodeStatus status = 5;
+  repeated string capabilities = 6;
+  double load = 7;
+  google.protobuf.Timestamp last_heartbeat = 8;
+  google.protobuf.Timestamp created_at = 9;
+}
+
+// RegisterRequest is the request for registering a node
+message RegisterRequest {
+  NodeInfo node = 1;
+}
+
+// RegisterResponse is the response for registering a node
+message RegisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// UnregisterRequest is the request for unregistering a node
+message UnregisterRequest {
+  string node_id = 1;
+}
+
+// UnregisterResponse is the response for unregistering a node
+message UnregisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// HeartbeatRequest is the request for updating a node's heartbeat
+message HeartbeatRequest {
+  string node_id = 1;
+}
+
+// HeartbeatResponse is the response for updating a node's heartbeat
+message HeartbeatResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// GetNodeRequest is the request for getting a node by ID
+message GetNodeRequest {
+  string node_id = 1;
+}
+
+// GetNodeResponse is the response for getting a node by ID
+message GetNodeResponse {
+  bool success = 1;
+  string message = 2;
+  NodeInfo node = 3;
+}
+
+// GetAllNodesRequest is the request for getting all nodes
+message GetAllNodesRequest {}
+
+// GetAllNodesResponse is the response for getting all nodes
+message GetAllNodesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated NodeInfo nodes = 3;
+}
+
+// GetWorkerNodesRequest is the request for getting all worker nodes
+message GetWorkerNodesRequest {}
+
+// GetWorkerNodesResponse is the response for getting all worker nodes
+message GetWorkerNodesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated NodeInfo nodes = 3;
+}
+
+// ServiceRegistryService defines the service for node registration and discovery
+service ServiceRegistryService {
+  // Register registers a node with the registry
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  
+  // Unregister removes a node from the registry
+  rpc Unregister(UnregisterRequest) returns (UnregisterResponse);
+  
+  // Heartbeat updates the heartbeat timestamp for a node
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  
+  // GetNode retrieves a node by its ID
+  rpc GetNode(GetNodeRequest) returns (GetNodeResponse);
+  
+  // GetAllNodes returns all nodes in the registry
+  rpc GetAllNodes(GetAllNodesRequest) returns (GetAllNodesResponse);
+  
+  // GetWorkerNodes returns all worker nodes in the registry
+  rpc GetWorkerNodes(GetWorkerNodesRequest) returns (GetWorkerNodesResponse);
+}
