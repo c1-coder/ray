@@ -10,6 +10,7 @@ import (
 
 	"ray/src/common"
 	"ray/src/master"
+	"ray/src/ray_integration"
 	pb "ray/src/common"
 )
 
@@ -19,6 +20,20 @@ func main() {
 
 	// Create a new task queue
 	taskQueue := common.NewTaskQueue()
+
+	// Create and start Ray cluster
+	rayConfig := &ray_integration.RayConfig{
+		MasterAddress: "localhost:6379",
+		WorkerNodes:   []string{"localhost:6380", "localhost:6381", "localhost:6382"},
+		Resources:     map[string]float64{"CPU": 4.0, "memory": 8192.0},
+	}
+
+	rayCluster := ray_integration.NewRayCluster(rayConfig, registry, taskQueue)
+	if err := rayCluster.Start(); err != nil {
+		log.Printf("Failed to start Ray cluster: %v", err)
+	} else {
+		log.Println("Ray cluster started successfully")
+	}
 
 	// Create a new registry server
 	registryServer := master.NewRegistryServer(registry)
