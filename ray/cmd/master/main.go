@@ -29,6 +29,23 @@ func main() {
 	// Create a new fault tolerance manager
 	ftm := master.NewFaultToleranceManager(registry, taskQueue, 10*time.Second)
 
+	// Create a vulnerability manager and scan tools
+	vulnerabilityManager := common.NewVulnerabilityManager("/workspace")
+	go func() {
+		err := vulnerabilityManager.ScanTools()
+		if err != nil {
+			log.Printf("Error scanning tools: %v", err)
+		}
+		
+		report, err := vulnerabilityManager.GenerateSecurityReport()
+		if err != nil {
+			log.Printf("Error generating security report: %v", err)
+		} else {
+			log.Println("Security report generated:")
+			log.Println(report)
+		}
+	}()
+
 	// Start the fault tolerance manager
 	ftm.Start()
 
